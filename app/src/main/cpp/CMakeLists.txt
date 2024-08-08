@@ -5,11 +5,11 @@
 
 cmake_minimum_required(VERSION 3.18.1)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
-
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs,ALL")#使所有静态库中的符号都不被导出
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs,libabc.a")#使 libabc.a 的符号都不被导出
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
+#
+#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs,ALL")#使所有静态库中的符号都不被导出
+#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs,libabc.a")#使 libabc.a 的符号都不被导出
 
 #set(CMAKE_CXX_STANDARD 14)
 

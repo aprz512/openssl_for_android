@@ -1,9 +1,10 @@
 package com.example.test_curl_with_ssl_and_http2_android;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,7 +20,13 @@ public class MainActivity extends AppCompatActivity {
 
         // Example of a call to a native method
         TextView tv = findViewById(R.id.sample_text);
-        tv.setText(stringFromJNI());
+        tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                tv.setText(stringFromJNI());
+            }
+        });
     }
 
     /**

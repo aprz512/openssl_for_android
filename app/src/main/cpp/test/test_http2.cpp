@@ -17,6 +17,7 @@
 static void test1();
 static void test2();
 static void test3();
+int main();
 void test_curl_http2()
 {
     test2();
@@ -354,6 +355,9 @@ struct MemoryObject {
 
 #include <openssl/err.h>
 #include <openssl/ssl.h>
+#include <linux/in.h>
+#include <sys/endian.h>
+
 static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
 {
   CURLcode rv = CURLE_ABORTED_BY_CALLBACK;
@@ -398,7 +402,7 @@ static void test_http2_get()
 //    std::string url = "http://gcc.gnu.org/onlinedocs/cpp/";
 //    std::string url = "http://nghttp2.org";
 //    std::string url = "https://www.example.com/";
-    std::string url = "https://www.sina.com.cn";
+    std::string url = "https://www.google.com";
 //    std::string url = "https://www.baidu.com";
     bool enabled = true;
     bool is_http_2 = true;
@@ -553,4 +557,95 @@ int test_curl_ca_cert(void)
 static void test3()
 {
     test_curl_ca_cert();
+}
+
+
+
+using namespace  std;
+
+int main() {
+    int client = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    //添加SSL的加密/HASH算法
+    SSLeay_add_ssl_algorithms();
+    //客户端，服务端选择SSLv23_server_method()
+    const SSL_METHOD *meth = SSLv23_client_method();
+    //建立新的SSL上下文
+    SSL_CTX *ctx = SSL_CTX_new(meth);
+    if (ctx == nullptr) {
+        cout << "SSL_CTX_new error !";
+        return -1;
+    }
+
+    if (client < 0) {
+        cout << "socket error !";
+        return -1;
+    }
+
+    string host = "www.google.com";
+    unsigned short port = 443;
+    hostent *ip = gethostbyname(host.c_str());
+
+    sockaddr_in sin;
+    sin.sin_family = AF_INET;
+    sin.sin_port = htons(port);
+    sin.sin_addr = *(in_addr *)ip->h_addr_list[0];
+
+    if (connect(client, (sockaddr *)&sin, sizeof(sin)) < 0) {
+        cout << "connect error 1";
+        return -1;
+    }
+
+    //建立SSL
+    int ret;
+    SSL *ssl = SSL_new(ctx);
+    if (ssl == nullptr) {
+        cout << "SSL NEW error";
+        return -1;
+    }
+    //将SSL与TCP SOCKET 连接
+    SSL_set_fd(ssl, client);
+    // SSL连接
+    ret = SSL_connect(ssl);
+    if (ret == -1) {
+        cout << "SSL ACCEPT error ";
+        return -1;
+    }
+
+    stringstream stream;
+    stream << "GET https://" << host << " HTTP/1.0\r\n";
+    stream << "Accept: */*\r\n";
+    // stream << "Accept-Encoding: gzip, deflate,
+    // br\r\n";//不要编码，否则还得多一个解码的步骤
+    stream << "Accept-Language: zh-Hans-CN, zh-Hans; q=0.8, en-US; q=0.5, en; "
+              "q=0.3\r\n";
+    stream << "Connection: Keep-Alive\r\n";
+    stream << "Host: " << host << "\r\n";
+    stream << "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+              "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 "
+              "Safari/537.36 Edge/17.17134\r\n";
+    stream << "\r\n";
+
+    string s = stream.str();
+    const char *sendData = s.c_str();
+    ret = SSL_write(ssl, sendData, strlen(sendData));
+    if (ret == -1) {
+        cout << "SSL write error !";
+        return -1;
+    }
+    char *rec = new char[1024 * 1024];
+    int start = 0;
+    while ((ret = SSL_read(ssl, rec + start, 1024)) > 0) {
+        start += ret;
+    }
+    rec[start] = 0;
+    cout << rec;
+
+    //关闭SSL套接字
+    SSL_shutdown(ssl);
+    //释放SSL套接字
+    SSL_free(ssl);
+    //释放SSL会话环境
+    SSL_CTX_free(ctx);
+
+    close(client);
 }

@@ -10,7 +10,19 @@
 #define test_http2_hpp
 
 #include <stdio.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <openssl/err.h>
+#include <openssl/ssl.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <cstring>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 void test_curl_http2();
+int main();
 
 #endif /* test_http2_hpp */
